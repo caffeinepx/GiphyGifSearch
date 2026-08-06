@@ -9,7 +9,8 @@ A discord plugin to replace Klipy/Tenor with Giphy Gif Search instead
 - Clone this repo
 - Paste it inside src/userplugins/
 - Edit the index.tsx
-- In Line 14 add your own giphy key because mine would overload. `GIPHY_KEY = "<YOUR_KEY_HERE";`
+- In Line 22 add your own giphy key because mine would overload. `GIPHY_KEY = "<YOUR_KEY_HERE";`
+- If i get the production key i'll update then you dont need to change
 - How to get the Key? Go to https://developers.giphy.com/dashboard/ and make one (it's free and should work for your use case)
 - Save
 - Build and Inject
