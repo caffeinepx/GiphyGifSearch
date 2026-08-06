@@ -5,13 +5,25 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+import "./style.css";
+
+import ErrorBoundary from "@components/ErrorBoundary";
 import { Devs, IS_LINUX } from "@utils/constants";
+import { classNameFactory } from "@utils/css";
+import { getTheme, Theme } from "@utils/discord";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
-import { FluxDispatcher, LocaleStore } from "@webpack/common";
+import { FluxDispatcher, LocaleStore, MaskedLink } from "@webpack/common";
+
+import poweredByDarkBg from "file://assets/poweredBy-dark.png?base64";
+import poweredByLightBg from "file://assets/poweredBy-light.png?base64";
 
 // My Personal API Key (place your own because mine would run out of requests)
 const GIPHY_KEY = "oTYJsWrWGnaWjKKxgGzH90StXmdmQYrV";
+const GIPHY_HOME = "https://giphy.com/";
+const cl = classNameFactory("vc-giphy-");
+const POWERED_BY_DARK = `data:image/png;base64,${poweredByDarkBg}`;
+const POWERED_BY_LIGHT = `data:image/png;base64,${poweredByLightBg}`;
 
 let cachedCategories: TrendingCategories | null = null;
 // analytics pingback URLs keyed by gif id (for registershare / onsent)
@@ -216,10 +228,20 @@ export default definePlugin({
     patches: [
         {
             find: "renderHeaderContent()",
-            replacement: {
-                match: /placeholder:(\i),"aria-label":(\i)/,
-                replace: 'placeholder:$1?.replace(/Tenor|Klipy/gi,"Giphy"),"aria-label":$2?.replace(/Tenor|Klipy/gi,"Giphy")'
-            }
+            replacement: [
+                {
+                    match: /placeholder:(\i),"aria-label":(\i)/,
+                    replace: 'placeholder:$1?.replace(/Tenor|Klipy/gi,"Giphy"),"aria-label":$2?.replace(/Tenor|Klipy/gi,"Giphy")'
+                },
+                {
+                    match: /role:"tabpanel","aria-labelledby":(\i\.\i),className:(\i)\(\)\((\i\.\i),(\i)\)/,
+                    replace: 'role:"tabpanel","aria-labelledby":$1,className:$2()($3,$4,"vc-giphy-panel")'
+                },
+                {
+                    match: /children:this\.renderContent\(\)\}\)\]/,
+                    replace: "children:this.renderContent()}),$self.renderAttribution()]"
+                }
+            ]
         },
         {
             find: '"GIF_PICKER_TRENDING_FETCH_SUCCESS",trendingCategories:',
@@ -254,6 +276,25 @@ export default definePlugin({
             }
         }
     ],
+
+    renderAttribution: ErrorBoundary.wrap(() => {
+        const src = getTheme() === Theme.Light ? POWERED_BY_LIGHT : POWERED_BY_DARK;
+
+        return (
+            <MaskedLink
+                className={cl("attribution")}
+                href={GIPHY_HOME}
+                title="Powered by GIPHY"
+            >
+                <img
+                    className={cl("attribution-logo")}
+                    src={src}
+                    alt="Powered by GIPHY"
+                    draggable={false}
+                />
+            </MaskedLink>
+        );
+    }, { noop: true }),
 
     async start() {
         cachedCategories = await fetchCategories() ?? cachedCategories;
