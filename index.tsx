@@ -5,7 +5,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
-import { Devs } from "@utils/constants";
+import { Devs, IS_LINUX } from "@utils/constants";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
 import { FluxDispatcher, LocaleStore } from "@webpack/common";
@@ -64,23 +64,41 @@ function pickImage(images: Record<string, GiphyImage>, ...keys: string[]): Giphy
     return undefined;
 }
 
+function pickUrl(...candidates: Array<string | undefined>): string | undefined {
+    return candidates.find(u => !!u);
+}
+
 function toDiscordGif(item: GiphyResult): DiscordGif | null {
     const { images } = item;
     if (!images) return null;
 
-    const gif = pickImage(images, "original", "downsized_medium", "downsized", "fixed_height");
-    const video = pickImage(images, "original", "fixed_height", "fixed_width", "preview");
-    const preview = pickImage(images, "preview_gif", "fixed_width_still", "fixed_height_still", "original_still", "downsized_still");
+    const gif = pickImage(images, "fixed_height", "fixed_width", "downsized", "downsized_medium", "original");
+    const video = pickImage(images, "fixed_height", "fixed_width", "downsized_small", "original", "preview");
+    const still = pickImage(images, "fixed_height_still", "fixed_width_still", "preview_gif", "original_still", "downsized_still");
 
-    const gifUrl = gif?.url;
-    // Discord's picker uses a video source for playback in the grid (Tenor used webm)
-    const srcUrl = video?.mp4 || video?.webp || gifUrl;
-    const previewUrl = preview?.url || gifUrl;
+    const gifUrl = pickUrl(gif?.url, images.original?.url);
+    if (!gifUrl) return null;
 
-    if (!gifUrl || !srcUrl || !previewUrl) return null;
+    // Linux: Discord forces IMAGE format (tinywebp) and loads src via <img>.
+    // Elsewhere: VIDEO format and <video> — mp4 works. mp4 as src on Linux never loads.
+    const webpUrl = pickUrl(
+        gif?.webp,
+        video?.webp,
+        images.fixed_height?.webp,
+        images.fixed_width?.webp,
+        images.preview_webp?.url,
+    );
+    const mp4Url = pickUrl(video?.mp4, images.fixed_height?.mp4, images.original?.mp4, images.preview?.mp4);
 
-    const width = Number(gif?.width || video?.width || 0);
-    const height = Number(gif?.height || video?.height || 0);
+    const srcUrl = IS_LINUX
+        ? pickUrl(webpUrl, gifUrl)
+        : pickUrl(mp4Url, webpUrl, gifUrl);
+    if (!srcUrl) return null;
+
+    const previewUrl = pickUrl(still?.url, webpUrl, gifUrl) ?? gifUrl;
+    const dimSource = IS_LINUX ? (gif ?? video) : (video ?? gif);
+    const width = Number(dimSource?.width || gif?.width || video?.width || 0);
+    const height = Number(dimSource?.height || gif?.height || video?.height || 0);
     if (!width || !height) return null;
 
     if (item.analytics?.onsent?.url) {
