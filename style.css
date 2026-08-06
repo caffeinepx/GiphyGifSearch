@@ -1,0 +1,35 @@
+.vc-giphy-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.vc-giphy-panel > :nth-child(2) {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.vc-giphy-attribution {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    padding: 6px 12px 8px;
+    border-top: 1px solid var(--border-subtle, var(--background-modifier-accent));
+    text-decoration: none;
+}
+
+.vc-giphy-attribution:hover {
+    text-decoration: none;
+}
+
+.vc-giphy-attribution-logo {
+    display: block;
+    height: 16px;
+    width: auto;
+    opacity: 0.85;
+    pointer-events: none;
+}
+
+.vc-giphy-attribution:hover .vc-giphy-attribution-logo {
+    opacity: 1;
+}
