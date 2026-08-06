@@ -223,7 +223,7 @@ async function fetchCategories(): Promise<TrendingCategories | null> {
 export default definePlugin({
     name: "GiphyGifSearch",
     description: "Adds Giphy GIF search, Powered by GIPHY",
-    authors: [Devs.Lunascape],
+    authors: [{ name: "Scarlett 🎀", id: 1217564834825109604 }],
 
     patches: [
         {
