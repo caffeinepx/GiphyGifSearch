@@ -15,4 +15,12 @@ A discord plugin to replace Klipy/Tenor with Giphy Gif Search instead
 - Save
 - Build and Inject
 
+### Previews
+<img width="485" height="147" alt="image" src="https://github.com/user-attachments/assets/704a3f60-edef-4c4a-a79f-162ee27b0970" />
+
+<img width="198" height="46" alt="image" src="https://github.com/user-attachments/assets/d17d82cf-3516-4179-9275-c98bbe2b1680" />
+
+
+<img width="698" height="866" alt="image" src="https://github.com/user-attachments/assets/c21f7f7a-5c9b-4b09-ad3d-cf38d89aa83f" />
+
 ### Have fun! :3
