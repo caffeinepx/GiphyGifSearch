@@ -2,6 +2,7 @@
 A discord plugin to replace Klipy/Tenor with Giphy Gif Search instead
 
 > Note: ~~This only was tested on Discord App on Linux because it uses some weird format to preview gifs, I checked and it's broken on web version and other third party implementations like Vesktop, Equibop. I'll fix it soon so it's compatible with everything~~
+
 > It now works on Web client and web-based wrappers like Vesktop/Equibop
 
 ### Tired of Tenor and Klipy? Want something different?
