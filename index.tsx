@@ -8,11 +8,11 @@
 import "./style.css";
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { Devs, IS_LINUX } from "@utils/constants";
 import { classNameFactory } from "@utils/css";
 import { getTheme, Theme } from "@utils/discord";
 import { isNonNullish } from "@utils/guards";
 import definePlugin from "@utils/types";
+import { findStoreLazy } from "@webpack";
 import { FluxDispatcher, LocaleStore, MaskedLink } from "@webpack/common";
 
 import poweredByDarkBg from "file://assets/poweredBy-dark.png?base64";
@@ -26,6 +26,10 @@ const POWERED_BY_DARK = `data:image/png;base64,${poweredByDarkBg}`;
 const POWERED_BY_LIGHT = `data:image/png;base64,${poweredByLightBg}`;
 
 let cachedCategories: TrendingCategories | null = null;
+
+// Discord's picker renders "tinywebp" items via <img>, every other format via <video>.
+// Ask the store at runtime instead of guessing by OS (Equibop on Linux can report "webm").
+const GIFPickerViewStore = findStoreLazy("GIFPickerViewStore");
 // analytics pingback URLs keyed by gif id (for registershare / onsent)
 const analyticsById = new Map<string, string>();
 
@@ -91,8 +95,6 @@ function toDiscordGif(item: GiphyResult): DiscordGif | null {
     const gifUrl = pickUrl(gif?.url, images.original?.url);
     if (!gifUrl) return null;
 
-    // Linux: Discord forces IMAGE format (tinywebp) and loads src via <img>.
-    // Elsewhere: VIDEO format and <video> — mp4 works. mp4 as src on Linux never loads.
     const webpUrl = pickUrl(
         gif?.webp,
         video?.webp,
@@ -102,13 +104,15 @@ function toDiscordGif(item: GiphyResult): DiscordGif | null {
     );
     const mp4Url = pickUrl(video?.mp4, images.fixed_height?.mp4, images.original?.mp4, images.preview?.mp4);
 
-    const srcUrl = IS_LINUX
+    // "tinywebp" => <img> (webp/gif); anything else (webm, mp4, ...) => <video> needs mp4
+    const wantsImage = GIFPickerViewStore.getSelectedFormat() === "tinywebp";
+    const srcUrl = wantsImage
         ? pickUrl(webpUrl, gifUrl)
         : pickUrl(mp4Url, webpUrl, gifUrl);
     if (!srcUrl) return null;
 
     const previewUrl = pickUrl(still?.url, webpUrl, gifUrl) ?? gifUrl;
-    const dimSource = IS_LINUX ? (gif ?? video) : (video ?? gif);
+    const dimSource = wantsImage ? (gif ?? video) : (video ?? gif);
     const width = Number(dimSource?.width || gif?.width || video?.width || 0);
     const height = Number(dimSource?.height || gif?.height || video?.height || 0);
     if (!width || !height) return null;
@@ -263,7 +267,7 @@ export default definePlugin({
                     replace: "return $self.handleTrendingGifsFetch();$&"
                 },
                 {
-                    match: /\i\.\i\.post\(\{url:\i\.\i\.GIFS_SELECT,body:\{id:(\i),q:(\i),provider:\i\}/,
+                    match: /\i\.\i\.post\(\{url:\i\.\i\.GIFS_SELECT,body:\{id:(\i),q:(\i)\}/,
                     replace: "return $self.handleGifSelect($1,$2);$&"
                 }
             ]
@@ -332,7 +336,19 @@ export default definePlugin({
         if (!cachedCategories) {
             cachedCategories = await fetchCategories();
 
-            if (!cachedCategories) return;
+            if (!cachedCategories) {
+                // /gifs/categories returns 401 for standard (free) API keys.
+                // Empty success keeps the picker header from hanging; the
+                // trending grid still loads via handleTrendingGifsFetch.
+                FluxDispatcher.dispatch({
+                    type: "GIF_PICKER_TRENDING_FETCH_SUCCESS",
+                    trendingCategories: [],
+                    trendingGIFPreview: {
+                        src: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"
+                    }
+                });
+                return;
+            }
         }
 
         FluxDispatcher.dispatch({ type: "GIF_PICKER_TRENDING_FETCH_SUCCESS", ...cachedCategories });
