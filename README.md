@@ -8,6 +8,15 @@ A discord plugin to replace Klipy/Tenor with Giphy Gif Search instead
 ### Tired of Tenor and Klipy? Want something different?
 > Use Giphy!
 
+### Previews
+| Plugin in Settings | Giphy Attribution |
+|---------------|--------------|
+| <img width="485" height="147" alt="image" src="https://github.com/user-attachments/assets/704a3f60-edef-4c4a-a79f-162ee27b0970" /> | <img width="198" height="46" alt="image" src="https://github.com/user-attachments/assets/d17d82cf-3516-4179-9275-c98bbe2b1680" /> | 
+
+| Main Preview |
+|---------------|
+| <img width="698" height="866" alt="image" src="https://github.com/user-attachments/assets/c21f7f7a-5c9b-4b09-ad3d-cf38d89aa83f" /> |
+
 ### How to use?
 - Manually build Equicord/Vencord
 - Clone this repo
@@ -18,13 +27,5 @@ A discord plugin to replace Klipy/Tenor with Giphy Gif Search instead
 - How to get the Key? Go to https://developers.giphy.com/dashboard/ and make one (it's free and should work for your use case)
 - Save
 - Build and Inject
-
-### Previews
-<img width="485" height="147" alt="image" src="https://github.com/user-attachments/assets/704a3f60-edef-4c4a-a79f-162ee27b0970" />
-
-<img width="198" height="46" alt="image" src="https://github.com/user-attachments/assets/d17d82cf-3516-4179-9275-c98bbe2b1680" />
-
-
-<img width="698" height="866" alt="image" src="https://github.com/user-attachments/assets/c21f7f7a-5c9b-4b09-ad3d-cf38d89aa83f" />
 
 ### Have fun! :3
