@@ -5,6 +5,9 @@ A discord plugin to replace Klipy/Tenor with Giphy Gif Search instead
 
 > It now works on Web client and web-based wrappers like Vesktop/Equibop
 
+> New Note: It's already implemented in native Equicord now: https://github.com/Equicord/Equicord/tree/main/src/plugins/gifProviderSwitcher
+> But they didn't add giphy attribution (aka the branding) so ig incase you want that use this
+
 ### Tired of Tenor and Klipy? Want something different?
 > Use Giphy!
 
